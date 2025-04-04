@@ -20,7 +20,7 @@ connectDb()
             //     port : Number(process.env.DB_URL as string) || 9000,
             // }
             listen : {
-                port : Number(process.env.DB_URL as string) || 9000,
+                port : Number(process.env.PORT as string) || 9000,
             }
         });
         console.log(`🚀 Server ready at ${url}`);
