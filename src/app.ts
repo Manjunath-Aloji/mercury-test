@@ -1,4 +1,5 @@
 import { ApolloServer } from "@apollo/server";
+import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault } from '@apollo/server/plugin/landingPage/default';
 import mercury from "@mercury-js/core";
 import { mergeTypeDefs, mergeResolvers } from "@graphql-tools/merge";
 import "./models/index.ts";
@@ -22,10 +23,18 @@ const mergedResolvers = mergeResolvers(
 // mercury.addGraphqlSchema(userTypeDef, userResolvers);
 
 const server = new ApolloServer({
-    // typeDefs: mercury.typeDefs,
-    // resolvers: mercury.resolvers,
+    introspection: true,
     typeDefs: mergedTypeDefs,
     resolvers: mergedResolvers,
+    plugins: [ApolloServerPluginLandingPageProductionDefault({
+        graphRef: 'My-Graph-dh3i1@my-graph-variant',
+        embed: true,
+    })],
+    rootValue : () => ({
+        mercuryResolvers: mergedResolvers,
+    }),
 });
 
 export default server;
+
+// user:fp.7811eee0-b049-4181-ad21-b6cabc7747c3:6TtdKAxLkqBezQA9lpXMcQ
