@@ -15,9 +15,9 @@ connectDb()
         // app.listen(3000, () => console.log("Server is running on port 3000"))3
         const { url } = await startStandaloneServer(server, {
             context: verifyJwt,
-            listen : {
-                port : 9000
-            }
+            // listen : {
+            //     port : 9000
+            // }
         });
         console.log(`🚀 Server ready at ${url}`);
     })
