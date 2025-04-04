@@ -15,10 +15,10 @@ connectDb()
         // app.listen(3000, () => console.log("Server is running on port 3000"))3
         const { url } = await startStandaloneServer(server, {
             context: verifyJwt,
-            listen : {
-                host : "https://mercury-test.onrender.com/",
-                port : Number(process.env.DB_URL as string) || 9000,
-            }
+            // listen : {
+            //     host : "https://mercury-test.onrender.com/",
+            //     port : Number(process.env.DB_URL as string) || 9000,
+            // }
             // listen : {
             //     port : 9000
             // }
