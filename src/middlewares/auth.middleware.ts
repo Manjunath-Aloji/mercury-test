@@ -15,6 +15,8 @@ const verifyJwt = async ({
     res: ServerResponse;
 }) => {
     
+    console.log(req.body?.operationName);
+    
     if (!req.body?.operationName) return { user: { id: "1", profile: "DEFAULT" } };
     
     if (
