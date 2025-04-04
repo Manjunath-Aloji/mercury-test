@@ -19,9 +19,9 @@ connectDb()
             //     host : "https://mercury-test.onrender.com/",
             //     port : Number(process.env.DB_URL as string) || 9000,
             // }
-            // listen : {
-            //     port : 9000
-            // }
+            listen : {
+                port : Number(process.env.DB_URL as string) || 9000,
+            }
         });
         console.log(`🚀 Server ready at ${url}`);
     })
