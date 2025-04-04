@@ -30,9 +30,6 @@ const server = new ApolloServer({
         graphRef: 'My-Graph-dh3i1@my-graph-variant',
         embed: true,
     })],
-    rootValue : () => ({
-        mercuryResolvers: mergedResolvers,
-    }),
 });
 
 export default server;
