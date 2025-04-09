@@ -10,7 +10,7 @@ const rules: Rule[] = [
             update: true,
             delete: true,
         },
-    },
+    }
 ];
 
-export const adminProfile = mercury.access.createProfile("ADMIN", rules);
+export const superAdminProfile = mercury.access.createProfile("SUPER_ADMIN", rules);

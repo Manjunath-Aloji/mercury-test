@@ -5,11 +5,17 @@ export interface UserInterface {
     _id: Schema.Types.ObjectId;
     first_name: string;
     last_name: string;
+    user_name: string;
     phone: string;
     role: string;
-    user_name: string;
     email: string;
+    school_id: string;
+    active: boolean;
+    gender: string;
     id: string;
+    password: string;
+    accessToken : string;
+    profile: string;
 }
 
 export type UserModel = Model<UserInterface>;
@@ -58,8 +64,15 @@ export const User = mercury.createModel<UserModel>(
             default: "STUDENT",
         },
         password: { type: "string", required: true },
-        photo: { type: "string" },
+        profile_photo: { type: "string" },
         address: { type: "string" },
+        // school_id: { type: "relationship", ref: "School", foreignField: "id" },
+        active: { type: "boolean", default: true },
+        gender: {
+            type: "enum",
+            enumType: "string",
+            enum: ["MALE", "FEMALE", "OTHER"],
+        }
     },
     {
         historyTracking: true,

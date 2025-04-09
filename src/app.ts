@@ -5,6 +5,8 @@ import { ApolloServer } from "@apollo/server";
 // } from "@apollo/server/plugin/landingPage/default";
 import mercury from "@mercury-js/core";
 import { mergeTypeDefs, mergeResolvers } from "@graphql-tools/merge";
+import { makeExecutableSchema } from '@graphql-tools/schema';
+
 import "./models/index.ts";
 import "./profiles/index.ts";
 
@@ -13,18 +15,34 @@ import {
     customUserTypeDef,
 } from "./controllers/user.controller.ts";
 
-const mergedTypeDefs = mergeTypeDefs([mercury.typeDefs, customUserTypeDef]);
+const globalTypeDef = `
+    input ImageUploadInput {
+        file_name: String!
+        base64: String!
+    }
+`;
+
+const mergedTypeDefs = mergeTypeDefs([
+    globalTypeDef,
+    mercury.typeDefs,
+    customUserTypeDef,
+]);
+
 const mergedResolvers = mergeResolvers([
     mercury.resolvers,
     customUserResolvers,
 ]);
 
-// mercury.addGraphqlSchema(userTypeDef, userResolvers);
+// mercury.addGraphqlSchema(customUserTypeDef, customUserResolvers)
 
 const server = new ApolloServer({
     introspection: true,
-    typeDefs: mergedTypeDefs,
-    resolvers: mergedResolvers,
+    schema: makeExecutableSchema({
+        typeDefs: mergedTypeDefs,
+        resolvers: mergedResolvers,
+    }),
+    // typeDefs: mergedTypeDefs,
+    // resolvers: mergedResolvers,
     // plugins: [
     //     process.env.NODE_ENV === "production"
     //         ? ApolloServerPluginLandingPageProductionDefault({

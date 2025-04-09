@@ -1,6 +1,9 @@
 import mercury from "@mercury-js/core";
 import jwt, { SignOptions } from "jsonwebtoken";
-import { Context } from "../type";
+import { Context, ImageUploadInput } from "../type";
+import { uploadImage } from "../utils/index.ts";
+import { Schema } from "mongoose";
+import { UserInterface, UserModel } from "../models/users.model.ts";
 
 const customUserTypeDef = `
   type User {
@@ -13,21 +16,25 @@ const customUserTypeDef = `
 
     signUp(
         first_name: String!,
-        last_name: String!,
-        phone: String!,
+        last_name: String,
+        phone: String,
         role: String!,
         email: String!,
         user_name: String,
-        password: String!
-        address: String!
+        password: String!,
+        address: String,
+        profile_photo: ImageUploadInput,
+        gender: String!,
     ): User
+
+    signInClass(identifier: String!, password: String!): User
 
     changePassword(oldPassword: String!, newPassword: String!): String
 }
 
 `;
 
-const generateAccessToken = async (id: string) => {
+const generateAccessToken = async (id: string | Schema.Types.ObjectId) => {
     return jwt.sign(
         {
             id: id,
@@ -44,10 +51,11 @@ const customUserResolvers = {
     Mutation: {
         signIn: async (
             _: any,
-            { identifier, password }: { identifier: string; password: string }
+            { identifier, password }: { identifier: string; password: string },
+            context: Context
         ) => {
 
-            const user = await mercury.db.User.get(
+            const user : UserInterface | undefined = await mercury.db.User.get(
                 { $or: [{ user_name: identifier }, { email: identifier }] },
                 { id: "1", profile: "DEFAULT" }
             );
@@ -65,9 +73,11 @@ const customUserResolvers = {
                 throw new Error("Invalid password");
             }
 
-            const accessToken = await generateAccessToken(user._id);
+            const accessTokenFromClass = context.auth.generateToken(user.id);           
 
-            delete user.password;
+            const accessToken = await generateAccessToken(user.id);
+
+            // delete user.password;
             user.accessToken = accessToken;
             return user;
         },
@@ -83,6 +93,9 @@ const customUserResolvers = {
                 user_name,
                 password,
                 address,
+                profile_photo,
+                school_id,
+                gender,
             }: {
                 first_name: string;
                 last_name: string;
@@ -92,6 +105,9 @@ const customUserResolvers = {
                 user_name: string | undefined;
                 password: string;
                 address: string;
+                profile_photo: ImageUploadInput;
+                school_id: string;
+                gender: string;
             }
         ) => {
             const existingUser = await mercury.db.User.get(
@@ -99,19 +115,34 @@ const customUserResolvers = {
                 { id: "1", profile: "DEFAULT" }
             );
 
-            if (Object.keys(existingUser).length > 0) {
+            if (existingUser) {
                 throw new Error("User with same email already exists.");
+            }
+
+            if (profile_photo) {
+                await uploadImage(
+                    profile_photo.file_name,
+                    profile_photo.base64
+                ).then((res) => {
+                    profile_photo.file_name = res;
+                }
+                );
             }
             const user = await mercury.db.User.create(
                 {
                     first_name,
-                    last_name,
-                    phone,
                     role,
                     email,
                     password,
+                    gender,
                     user_name: user_name || email,
-                    address,
+                    ...(school_id && { school_id }),
+                    ...(profile_photo && {
+                        profile_photo: profile_photo.file_name,
+                    }),
+                    ...(last_name && { last_name }),
+                    ...(phone && { phone }),
+                    ...(address && { address }),
                 },
                 { id: "1", profile: "DEFAULT" },
                 {
@@ -140,7 +171,7 @@ const customUserResolvers = {
 
             const user = await mercury.db.User.get(
                 { _id: contextUser._id },
-                { id: contextUser.id, profile: contextUser.role }
+                contextUser
             );
 
             if (!user) {
@@ -151,7 +182,7 @@ const customUserResolvers = {
                 user,
                 "password",
                 oldPassword,
-                { id: contextUser.id, profile: contextUser.role }
+                contextUser
             );
 
             if (!isPasswordCorrect) {
@@ -161,7 +192,7 @@ const customUserResolvers = {
             await mercury.db.User.update(
                 contextUser.id,
                 { password: newPassword },
-                { id: contextUser.id, profile: contextUser.role }
+                contextUser
             );
 
             return "Password changed successfully";

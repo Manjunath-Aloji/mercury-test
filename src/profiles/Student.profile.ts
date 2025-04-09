@@ -1,5 +1,5 @@
 import mercury from "@mercury-js/core";
-import { Rule } from "@mercury-js/core/dist/esm/types";
+import { Rule } from "@mercury-js/core";
 
 const rules: Rule[] = [
     {

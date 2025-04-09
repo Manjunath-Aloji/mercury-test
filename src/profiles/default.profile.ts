@@ -6,8 +6,8 @@ const rules = [
         access: {
             create: true,
             read: true,
-            update: true,
-            delete: true,
+            update: false,
+            delete: false,
         },
     },
 ];
